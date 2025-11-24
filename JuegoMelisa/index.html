@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Misión Bienestar - Juego Completo</title>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #76baff, #c6e3ff);
+        margin: 0; padding: 0; text-align: center;
+    }
+    #container {
+        width: 1000px; margin: auto; padding: 20px; background: #ffffffcc;
+        margin-top: 30px; border-radius: 15px; backdrop-filter: blur(10px);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    button {
+        padding: 12px 20px; margin: 10px; border: none; background: #0077ff;
+        color: white; border-radius: 10px; cursor: pointer; font-size: 16px;
+        transition: 0.3s;
+    }
+    button:hover { background: #005fcc; transform: scale(1.05); }
+
+    .option {
+        display: block; margin: 10px auto; padding: 15px; width: 80%;
+        border: 1px solid #ccc; border-radius: 10px; background: #f9f9f9;
+        cursor: pointer; transition: 0.2s;
+    }
+    .option:hover { background: #e8f1ff; transform: scale(1.02); }
+
+    .hidden { display: none; }
+
+    #feedback { font-weight: bold; font-size: 20px; margin-top: 10px; }
+
+    #progressBarContainer {
+        width: 90%; background: #ddd; margin: 15px auto;
+        height: 18px; border-radius: 10px;
+    }
+    #progressBar {
+        height: 100%; width: 0%; background: #00a32d;
+        border-radius: 10px; transition: 0.5s;
+    }
+
+    /* Personaje animado */
+    #character {
+        width: 350px;
+        animation: float 1s infinite alternate ease-in-out;
+    }
+    @keyframes float {
+        from { transform: translateY(0px); }
+        to { transform: translateY(-10px); }
+    }
+
+    /* Bocadito de diálogo */
+    #dialog {
+        background: #fff; padding: 10px 15px;
+        display: inline-block; border-radius: 10px;
+        margin-top: 12px; max-width: 600px;
+        animation: fadeIn 0.4s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.7); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Imágenes del menú */
+    .menu-img {
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+        margin: 10px;
+        border-radius: 12px;
+        background: #fff;
+        padding: 10px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.2);
+        transition: 0.3s;
+    }
+
+    /* Estadisticas */
+
+    #statsData p, 
+    #statsData h3 {
+        font-size: 20px !important;
+        margin: 6px 0;
+    }
+
+    .statsTable {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-size: 16px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .statsTable th {
+        background: #0077ff;
+        color: white;
+        padding: 10px;
+    }
+
+    .statsTable td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .statsTable tr:nth-child(even) {
+        background: #f6faff;
+    }
+
+    .statsTable tr:hover {
+        background: #e8f1ff;
+    }
+
+    #statsTableWrapper {
+    max-height: 500px;     /* Altura del recuadro – la puedes cambiar */
+    overflow-y: auto;      /* Scroll vertical */
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 5px;
+    background: white;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<!-- BOTÓN VOLVER AL INICIO -->
+<button onclick="goHome()" 
+style="position: fixed; top: 15px; left: 15px; padding: 10px 18px;
+background:#ff5252; color:white; border:none; border-radius:8px;
+cursor:pointer; font-size:15px; z-index:999;">
+⟵ Inicio
+</button>
+
+<div id="container">
+
+    <h1>Misión Bienestar</h1>
+
+    <img id="character" src="Imagenes/Giif-2.gif" alt="Guía del juego">
+
+    <div id="dialog">Este juego interactivo permite a los trabajadores reconocer los principales factores de riesgo psicosocial presentes en su entorno laboral, comprendiendo cómo influyen en su bienestar físico y emocional. A través de situaciones reales, deberán identificar riesgos, elegir acciones de prevención y descubrir cómo estos pueden desencadenar enfermedades como el estrés laboral crónico. El objetivo es aprender de manera dinámica y participativa a mejorar las condiciones de trabajo y promover ambientes laborales saludables. 🎮</div>
+
+    <!-- ========================= -->
+    <!--  IMÁGENES DE CADA NIVEL   -->
+    <!-- ========================= -->
+
+    <div style="margin-top:20px;">
+        <img src="Imagenes/Demanda.webp" id="img-demandas" class="menu-img">
+        <img src="Imagenes/control.jpg" id="img-control" class="menu-img">
+        <img src="Imagenes/Lidazgo.jpg" id="img-liderazgo" class="menu-img">
+        <img src="Imagenes/recompenza.avif" id="img-recompensa" class="menu-img">
+    </div>
+
+    <!-- MENÚ -->
+    <div id="menu">
+        <h2>Selecciona un Nivel</h2>
+        <button onclick="selectLevel('demandas')">Demandas</button>
+        <button onclick="selectLevel('control')">Control</button>
+        <button onclick="selectLevel('liderazgo')">Liderazgo</button>
+        <button onclick="selectLevel('recompensa')">Recompensa</button>
+        <button onclick="openStats()">Estadísticas</button>
+    </div>
+
+    <!-- JUEGO -->
+    <div id="game" class="hidden">
+        <div id="progressBarContainer"><div id="progressBar"></div></div>
+
+        <h2 id="caseTitle"></h2>
+        <p id="caseText"></p>
+
+        <div id="options"></div>
+
+        <p id="feedback"></p>
+
+        <button id="nextBtn" onclick="nextCase()">Siguiente</button>
+    </div>
+
+    <!-- FINAL -->
+    <div id="end" class="hidden">
+        <h2>¡Nivel completado!</h2>
+        <p>Puntaje: <span id="score"></span>/5</p>
+        <button onclick="returnMenu()">Volver al menú</button>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div id="stats" class="hidden">
+        <h2>Estadísticas Generales</h2>
+        <pre id="statsData"></pre>
+        <button onclick="returnMenu()">Cerrrar</button>
+    </div>
+
+</div>
+
+<script>
+/* ----------- IMÁGENES DEL MENÚ ----------- */
+const imgs = {
+    demandas: document.getElementById("img-demandas"),
+    control: document.getElementById("img-control"),
+    liderazgo: document.getElementById("img-liderazgo"),
+    recompensa: document.getElementById("img-recompensa")
+};
+
+function resetImages() {
+    Object.values(imgs).forEach(img => {
+        img.style.width = "150px";
+        img.style.opacity = "1";
+        img.style.transform = "scale(1)";
+    });
+}
+
+/* ---------- VARIABLES ---------- */
+let score = 0;
+let currentLevel = '';
+let caseIndex = 0;
+let selectedCases = [];
+
+let history = JSON.parse(localStorage.getItem("history") || "[]");
+
+/* ---------- SELECCIONAR NIVEL ---------- */
+function selectLevel(level) {
+    document.getElementById("dialog").style.display = "none";
+    document.getElementById("character").classList.add("hidden");
+
+    resetImages();
+
+    // agrandar la imagen seleccionada
+    imgs[level].style.width = "230px";
+    imgs[level].style.transform = "scale(1.15)";
+    imgs[level].style.opacity = "1";
+
+    startLevel(level);
+}
+
+/* ---------- BANCO DE PREGUNTAS ---------- */
+const cases = {
+    demandas: [
+        { title:"Sobrecarga extrema", text:"¿Cuál de los siguientes factores se considera una demanda laboral que incrementa el riesgo de Burnout?", options:[
+            {letter:"A",text:"Reconocimiento por parte de los superiores",correct:false},
+            {letter:"B",text:"Temperaturas extremas en el lugar de trabajo",correct:true},
+            {letter:"C",text:"Flexibilidad horaria",correct:false},
+            {letter:"D",text:"Programas de bienestar laboral",correct:false}
+        ]},
+        { title:"Plazos imposibles", text:"El agotamiento emocional aparece cuando:", options:[
+            {letter:"A",text:"Las tareas son repetitivas pero fáciles",correct:false},
+            {letter:"B",text:"Las demandas superan los recursos del trabajador",correct:true},
+            {letter:"C",text:"Hay libertad total para tomar decisiones",correct:false},
+            {letter:"D",text:"Existen pausas activas frecuentes",correct:false}
+        ]},
+        { title:"Turnos extendidos", text:"Un ritmo acelerado de trabajo y presión constante por tiempos de entrega genera:", options:[
+            {letter:"A",text:"Mayor satisfacción laboral",correct:false},
+            {letter:"B",text:"Disminución del apoyo social",correct:false},
+            {letter:"C",text:"Incremento de la carga mental",correct:true},
+            {letter:"D",text:"Mejora en la comunicación",correct:false}
+        ]},
+        { title:"Sobrecarga mental", text:"La exposición prolongada a altas demandas físicas produce principalmente:", options:[
+            {letter:"A",text:"Aumento de creatividad",correct:false},
+            {letter:"B",text:"Fatiga crónica",correct:true},
+            {letter:"C",text:"Motivación extrínseca",correct:false},
+            {letter:"D",text:"Claridad de rol",correct:false}
+        ]},
+        { title:"Demasiados proyectos", text:"Cuando existe falta de personal y sobredemanda laboral, el riesgo más probable es:", options:[
+            {letter:"A",text:"Aumento de incentivos económicos",correct:false},
+            {letter:"B",text:"Habilidades blandas",correct:false},
+            {letter:"C",text:"Burnout o estrés crónico",correct:true},
+            {letter:"D",text:"Disminución del esfuerzo percibido",correct:false}
+        ]}
+    ],
+
+    control: [
+        {
+            title:"Tareas sin decisión",
+            text:"El bajo control sobre las tareas laborales se relaciona con:",
+            options:[
+                {letter:"A",text:"Reducción del estrés",correct:false},
+                {letter:"B",text:"Mayor autonomía",correct:false},
+                {letter:"C",text:"Mayor riesgo psicosocial",correct:true},
+                {letter:"D",text:"Altos niveles de compromiso",correct:false}
+            ]
+        },
+        {
+            title:"Micromanagement",
+            text:"¿Cuál de las siguientes situaciones indica baja autonomía?",
+            options:[
+                {letter:"A",text:"Elegir el método de trabajo",correct:false},
+                {letter:"B",text:"Tomar decisiones en procesos críticos",correct:false},
+                {letter:"C",text:"Horarios flexibles",correct:false},
+                {letter:"D",text:"No participar en decisiones",correct:true}
+            ]
+        },
+        {
+            title:"Sin elección",
+            text:"El modelo Demanda–Control señala que el riesgo más alto ocurre cuando:",
+            options:[
+                {letter:"A",text:"Baja demanda - Alto control",correct:false},
+                {letter:"B",text:"Alta demanda - Bajo control",correct:true},
+                {letter:"C",text:"Alta demanda - Alto control",correct:false},
+                {letter:"D",text:"Baja demanda - Bajo control",correct:false}
+            ]
+        },
+        {
+            title:"Sin pausas",
+            text:"Un trabajador con poco control suele presentar:",
+            options:[
+                {letter:"A",text:"Mayor satisfacción laboral",correct:false},
+                {letter:"B",text:"Mayor creatividad",correct:false},
+                {letter:"C",text:"Mayor inseguridad y tensión",correct:true},
+                {letter:"D",text:"Menos conflictos interpersonales",correct:false}
+            ]
+        },
+        {
+            title:"Trabajo rígido",
+            text:"Cuando el trabajador puede decidir cómo realizar sus tareas, se considera que tiene:",
+            options:[
+                {letter:"A",text:"Sobrecarga laboral",correct:false},
+                {letter:"B",text:"Ausencia de apoyo emocional",correct:false},
+                {letter:"C",text:"Alto control",correct:true},
+                {letter:"D",text:"Bajo reconocimiento",correct:false}
+            ]
+        }
+    ],
+
+    liderazgo: [
+        {
+            title:"Jefe agresivo",
+            text:"Un liderazgo autoritario aumenta el riesgo de:",
+            options:[
+                {letter:"A",text:"Cohesión del equipo",correct:false},
+                {letter:"B",text:"Distrés y agotamiento",correct:true},
+                {letter:"C",text:"Satisfacción laboral",correct:false},
+                {letter:"D",text:"Reconocimiento al desempeño",correct:false}
+            ]
+        },
+        {
+            title:"No escucha",
+            text:"La falta de retroalimentación adecuada del líder genera:",
+            options:[
+                {letter:"A",text:"Mejor clima laboral",correct:false},
+                {letter:"B",text:"Ambigüedad de rol",correct:true},
+                {letter:"C",text:"Mayor compromiso",correct:false},
+                {letter:"D",text:"Disminución del estrés",correct:false}
+            ]
+        },
+        {
+            title:"Injusticias",
+            text:"La ausencia de reconocimiento afecta principalmente:",
+            options:[
+                {letter:"A",text:"La motivación y el sentido de logro",correct:true},
+                {letter:"B",text:"La autonomía",correct:false},
+                {letter:"C",text:"La ergonomía del puesto",correct:false},
+                {letter:"D",text:"El nivel de formación",correct:false}
+            ]
+        },
+        {
+            title:"Comunicación nula",
+            text:"Un buen liderazgo se caracteriza por:",
+            options:[
+                {letter:"A",text:"Comunicación clara y apoyo al equipo",correct:true},
+                {letter:"B",text:"Sobrecarga de tareas",correct:false},
+                {letter:"C",text:"Aislamiento del trabajador",correct:false},
+                {letter:"D",text:"Presión constante por resultados",correct:false}
+            ]
+        },
+        {
+            title:"No reconoce esfuerzo",
+            text:"La falta de apoyo social entre compañeros tiende a:",
+            options:[
+                {letter:"A",text:"Disminuir el nivel de estrés",correct:false},
+                {letter:"B",text:"Facilitar la resolución de conflictos",correct:false},
+                {letter:"C",text:"Incrementar la ansiedad laboral",correct:true},
+                {letter:"D",text:"Mejorar la satisfacción",correct:false}
+            ]
+        }
+    ],
+
+    recompensa: [
+        {
+            title:"Sin reconocimiento",
+            text:"La ausencia de reconocimiento contribuye al desarrollo de:",
+            options:[
+                {letter:"A",text:"Mayor compromiso",correct:false},
+                {letter:"B",text:"Estrés crónico",correct:true},
+                {letter:"C",text:"Buen clima laboral",correct:false},
+                {letter:"D",text:"Flujo de trabajo eficiente",correct:false}
+            ]
+        },
+        {
+            title:"Pagos desiguales",
+            text:"El esfuerzo físico constante sin compensación adecuada genera:",
+            options:[
+                {letter:"A",text:"Motivación intrínseca",correct:false},
+                {letter:"B",text:"Mejora del clima organizacional",correct:false},
+                {letter:"C",text:"Riesgos ergonómicos y desgaste físico",correct:true},
+                {letter:"D",text:"Aumento de creatividad",correct:false}
+            ]
+        },
+        {
+            title:"Sin oportunidades",
+            text:"La inequidad entre esfuerzo y recompensa provoca:",
+            options:[
+                {letter:"A",text:"Satisfacción",correct:false},
+                {letter:"B",text:"Injusticia percibida",correct:true},
+                {letter:"C",text:"Reconocimiento social",correct:false},
+                {letter:"D",text:"Mejora del rendimiento",correct:false}
+            ]
+        },
+        {
+            title:"Premios injustos",
+            text:"¿Qué elemento NO se considera una recompensa laboral?",
+            options:[
+                {letter:"A",text:"Salario justo",correct:false},
+                {letter:"B",text:"Reconocimiento del desempeño",correct:false},
+                {letter:"C",text:"Sobrecarga de tareas",correct:true},
+                {letter:"D",text:"Oportunidades de crecimiento",correct:false}
+            ]
+        },
+        {
+            title:"No valoran antigüedad",
+            text:"Cuando un trabajador no recibe retroalimentación ni incentivos, es común que presente:",
+            options:[
+                {letter:"A",text:"Mayor sentido de pertenencia",correct:false},
+                {letter:"B",text:"Disminución de la motivación",correct:true},
+                {letter:"C",text:"Aumento del optimismo",correct:false},
+                {letter:"D",text:"Menor carga mental",correct:false}
+            ]
+        }
+    ]
+};
+
+/* ---------- INICIAR NIVEL ---------- */
+function startLevel(level) {
+    currentLevel = level;
+    score = 0;
+    caseIndex = 0;
+
+    selectedCases = shuffle([...cases[level]]).slice(0, 5);
+
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+
+    loadCase();
+}
+
+/* ---------- CARGAR CASO ---------- */
+function loadCase() {
+    const data = selectedCases[caseIndex];
+
+    document.getElementById("caseTitle").innerText = data.title;
+    document.getElementById("caseText").innerText = data.text;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    data.options.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.innerHTML = `<b>${opt.letter}.</b> ${opt.text}`;
+        div.onclick = () => selectOption(opt.correct);
+        optionsDiv.appendChild(div);
+    });
+
+    updateProgress();
+}
+/* ---------- Sonidos ---------- */
+const soundCorrect = new Audio("Audio/correct.mp3");
+/* ---------- SELECCIONAR OPCIÓN ---------- */
+function selectOption(correct) {
+    
+
+        document.querySelectorAll(".option").forEach(opt => {
+        opt.style.pointerEvents = "none";   // bloquea clics
+        opt.style.opacity = "0.6";          // efecto visual opcional
+    });
+
+    const f = document.getElementById("feedback");
+
+    if (correct) {
+        score++;
+        f.innerHTML = "✔ ¡Correcto!";
+        f.style.color = "green";
+        soundCorrect.currentTime = 0;   // Reinicia el audio
+        soundCorrect.play();           // Reproduce el sonido
+    } else {
+        f.innerHTML = "✖ Incorrecto";
+        f.style.color = "red";
+
+        setTimeout(() => {
+            nextCase();
+        }, 900);
+    }
+
+    history.push({
+        level: currentLevel,
+        question: selectedCases[caseIndex].title,
+        correct
+    });
+
+    localStorage.setItem("history", JSON.stringify(history));
+}
+
+function nextCase() {
+    document.getElementById("feedback").innerText = "";
+    caseIndex++;
+
+    if (caseIndex < selectedCases.length) {
+        loadCase();
+    } else {
+        endLevel();
+    }
+}
+
+function updateProgress() {
+    let percent = ((caseIndex) / 5) * 100;
+    document.getElementById("progressBar").style.width = percent + "%";
+}
+
+function endLevel() {
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+    document.getElementById("score").innerText = score;
+}
+
+function goHome() {
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("end").classList.add("hidden");
+    document.getElementById("stats").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+    document.getElementById("dialog").style.display = "block";
+    document.getElementById("character").classList.remove("hidden");
+    resetImages();
+}
+
+function returnMenu() {
+    goHome();
+}
+
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+/* ---------- ESTADÍSTICAS ---------- */
+
+function openStats() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("stats").classList.remove("hidden");
+
+    const total = history.length;
+    const correct = history.filter(x => x.correct).length;
+    const incorrect = total - correct;
+    const porcentaje = total > 0 ? ((correct / total) * 100).toFixed(1) : 0;
+
+    // --- HTML COMPLETO ---
+    let html = `
+        <h3 style="margin-bottom:5px;">Resumen General</h3>
+        <p style="font-size:18px;"><b>Total respondidas:</b> ${total}</p>
+        <p style="font-size:18px;"><b>Correctas:</b> <span style="color:green">${correct}</span></p>
+        <p style="font-size:18px;"><b>Incorrectas:</b> <span style="color:red">${incorrect}</span></p>
+        <p style="font-size:18px;"><b>Efectividad:</b> ${porcentaje}%</p>
+
+        <h3 style="margin-top:10px;">Historial de respuestas</h3>
+
+            <!-- SELECT DENTRO DEL RECUADRO -->
+            <select id="nivelFilter" onchange="filtrarTabla()" 
+                style="
+                    position:relative;
+                    top:8px;
+                    left:40%;
+                    padding:4px 4px 4px 4px;
+                    font-size:14px;
+                    border-radius:6px;
+                    
+                ">
+                <option value="Todos">Todos</option>
+                <option value="demandas">Demanda</option>
+                <option value="control">Control</option>
+                <option value="Liderazgo">Liderazgo</option>
+                <option value="recompensa">Recompensa</option>
+            </select>
+
+        <div id="statsTableWrapper" style="
+            max-height:600px;
+            overflow-y:auto;
+            border:1px solid #ccc;
+            padding:5px;
+            border-radius:10px;
+            position:relative;
+        ">
+
+            <table class="statsTable" id="statsTable" style="margin-top:40px;">
+                <tr>
+                    <th>Nivel</th>
+                    <th>Pregunta</th>
+                    <th>Resultado</th>
+                </tr>
+    `;
+
+    history.forEach(item => {
+        html += `
+            <tr>
+                <td>${item.level}</td>
+                <td>${item.question}</td>
+                <td style="color:${item.correct ? 'green' : 'red'}">
+                    ${item.correct ? "✔ Correcto" : "✖ Incorrecto"}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </table>
+        </div>
+    `;
+
+    document.getElementById("statsData").innerHTML = html;
+}
+
+
+function filtrarTabla() {
+    const filtro = document.getElementById("nivelFilter").value;
+    const filas = document.querySelectorAll("#statsTable tr");
+
+    for (let i = 1; i < filas.length; i++) {
+        const nivel = filas[i].children[0].innerText;
+
+        filas[i].style.display = (filtro === "Todos" || nivel === filtro)
+            ? ""
+            : "none";
+    }
+}
+
+  const dialog = document.getElementById("dialog");
+  const displayOriginal = window.getComputedStyle(dialog).display;
+
+  function ocultar() {
+    dialog.style.display = "none";
+  }
+
+  function mostrar() {
+    dialog.style.display = displayOriginal;
+  }
+
+
+</script>
+
+</body>
+</html>
